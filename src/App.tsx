@@ -20,7 +20,8 @@ import { MasterPlan } from './components/MasterPlan';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'timer' | 'subjects' | 'plan'>('dashboard');
-  const [daysLeft, setDaysLeft] = useState(50);
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [lang, setLang] = useState<'en' | 'bn'>(() => {
     const saved = localStorage.getItem('hsc-lang');
     return (saved as 'en' | 'bn') || 'bn';
@@ -31,11 +32,29 @@ export default function App() {
   }, [lang]);
 
   useEffect(() => {
-    const targetDate = new Date('2026-05-27');
-    const now = new Date();
-    const diff = targetDate.getTime() - now.getTime();
-    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
-    setDaysLeft(days > 0 ? days : 0);
+    const targetDate = new Date('2026-05-27T00:00:00');
+    
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentDateTime(now);
+      
+      const diff = targetDate.getTime() - now.getTime();
+      
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+        clearInterval(timer);
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      setTimeLeft({ days, hours, minutes, seconds });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   const t = {
@@ -47,6 +66,10 @@ export default function App() {
     countdown: lang === 'en' ? 'Countdown' : 'কাউন্টডাউন',
     days: lang === 'en' ? 'days' : 'দিন',
     remaining: lang === 'en' ? 'Remaining for HSC' : 'পরীক্ষার বাকি',
+    hours: lang === 'en' ? 'hours' : 'ঘণ্টা',
+    minutes: lang === 'en' ? 'minutes' : 'মিনিট',
+    seconds: lang === 'en' ? 'seconds' : 'সেকেন্ড',
+    currentDate: lang === 'en' ? 'Today is' : 'আজকের তারিখ',
     welcome: lang === 'en' ? 'Welcome back, Scholar!' : 'স্বাগতম, শিক্ষার্থী!',
     welcomeSub: lang === 'en' ? 'Your 50-day journey to excellence starts here.' : 'আপনার সাফল্যের ৫০ দিনের যাত্রা এখান থেকেই শুরু।',
     timerTitle: lang === 'en' ? 'Focus Session' : 'ফোকাস সেশন',
@@ -122,8 +145,37 @@ export default function App() {
 
           <div className="p-4 bg-slate-800 rounded-2xl border border-slate-700">
             <div className="text-xs font-bold text-slate-500 uppercase mb-2">{t.countdown}</div>
-            <div className="text-3xl font-bold text-primary">{daysLeft} {t.days}</div>
-            <div className="text-xs text-slate-400">{t.remaining}</div>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="text-center p-2 bg-slate-900 rounded-lg">
+                <div className="text-xl font-bold text-primary">{timeLeft.days}</div>
+                <div className="text-[10px] text-slate-500 uppercase">{t.days}</div>
+              </div>
+              <div className="text-center p-2 bg-slate-900 rounded-lg">
+                <div className="text-xl font-bold text-primary">{timeLeft.hours}</div>
+                <div className="text-[10px] text-slate-500 uppercase">{t.hours}</div>
+              </div>
+              <div className="text-center p-2 bg-slate-900 rounded-lg">
+                <div className="text-xl font-bold text-primary">{timeLeft.minutes}</div>
+                <div className="text-[10px] text-slate-500 uppercase">{t.minutes}</div>
+              </div>
+              <div className="text-center p-2 bg-slate-900 rounded-lg">
+                <div className="text-xl font-bold text-primary">{timeLeft.seconds}</div>
+                <div className="text-[10px] text-slate-500 uppercase">{t.seconds}</div>
+              </div>
+            </div>
+            <div className="text-[10px] text-slate-400 border-t border-slate-700 pt-2 mt-1">
+              <div className="flex justify-between">
+                <span>{t.currentDate}:</span>
+                <span className="text-slate-300">
+                  {currentDateTime.toLocaleDateString(lang === 'en' ? 'en-US' : 'bn-BD', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </aside>
@@ -168,9 +220,14 @@ export default function App() {
               {activeTab === 'plan' && t.planSub}
             </p>
           </div>
-          <div className="md:hidden flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full font-bold">
-            <CalendarDays size={18} />
-            {daysLeft} {t.days} {lang === 'en' ? 'left' : 'বাকি'}
+          <div className="md:hidden flex flex-col items-end gap-1">
+            <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold">
+              <CalendarDays size={14} />
+              {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+            </div>
+            <div className="text-[10px] text-slate-500">
+              {currentDateTime.toLocaleDateString(lang === 'en' ? 'en-US' : 'bn-BD', { weekday: 'short', month: 'short', day: 'numeric' })}
+            </div>
           </div>
         </header>
 
