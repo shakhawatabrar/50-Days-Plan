@@ -3,6 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Prevent fetch from being overwritten
+      (function() {
+        const originalFetch = window.fetch;
+        try {
+          Object.defineProperty(window, 'fetch', {
+            get: function() { return originalFetch; },
+            set: function(v) { 
+              console.warn('Attempted to overwrite window.fetch with:', v);
+              // We don't throw here to avoid crashing, but we don't set it either.
+              // Actually, the error says it HAS only a getter, so it's already non-writable.
+            },
+            configurable: false
+          });
+        } catch (e) {
+          console.error('Could not redefine fetch:', e);
+        }
+      })();
+    </script>
     <title>HSC Master</title>
   </head>
   <body>
