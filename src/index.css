@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-primary: #3b82f6;
+  --color-secondary: #6366f1;
+  --color-accent: #f59e0b;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased transition-colors duration-300;
+  }
+
+  .dark body {
+    @apply bg-slate-950 text-slate-100;
+  }
+}
+
+.glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl transition-all duration-300;
+}
+
+.dark .glass-card {
+  @apply bg-slate-900/80 border-slate-800/50 shadow-2xl shadow-black/20;
+}
+
+.btn-primary {
+  @apply px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20;
+}
+
+.progress-bar {
+  @apply h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full bg-primary transition-all duration-500 shadow-[0_0_10px_rgba(59,130,246,0.5)];
+}
